@@ -207,11 +207,15 @@ jul20$indicador_cuarentena
 #ss_nov20 <- na.omit(nov20[c(3,5:6,10,21,163:166)])
 #ss_jul21 <- na.omit(jul21[c(3,7:8,4,21,195:198)])
 
-ss_jul20 <- jul20[c(3:5,8,17,18,13,16,20,21,23,25,142:150,137:140)]
-ss_nov20 <- nov20[c(3,5:6,10,21,163:166)]
-ss_jul21 <- jul21[c(3,7:8,4,21,195:198)]
+ss_jul20 <- jul20[c("id_hogar","lista_hogar__id","area","macrozona","ch02","ch03","ch07","ch09","s","th","ch05","nna","thogar2","indicador_cuarentena","tramo_pobreza","qytot_19","qytot_20","sm011","sm012","sm013","sm014")]
+ss_nov20 <- nov20[c(3,10,163:166)]
+ss_jul21 <- jul21[c(3,4,195:198)]
 
-# rename variables with same name for each df
+cat(colnames(ss_jul20), sep="\n")
+cat(colnames(ss_nov20), sep="\n")
+cat(colnames(ss_jul21), sep="\n")
+
+# rename some variables that have same name
 ss_jul20 <- dplyr::rename(ss_jul20, j20phq1=sm011)
 ss_jul20 <- dplyr::rename(ss_jul20, j20phq2=sm012)
 ss_jul20 <- dplyr::rename(ss_jul20, j20phq3=sm013)
@@ -232,17 +236,14 @@ ss_jul21$id <- ss_jul21$id_hogar*1000+ss_jul21$lista_hogar__id
 
 #merging part 1
 df <- dplyr::inner_join(ss_jul20,ss_nov20, by="id")
-#check if successful
-#table(df$area.x,df$area.y) #perfect
-#table(df$macrozona.x,df$macrozona.y) #perfect
 #merging part 2
 df <- dplyr::inner_join(df,ss_jul21, by="id")
+#remove subset dfs to cleanup
+rm(ss_jul20,ss_nov20,ss_jul21)
 #remove redundant variables
 cat(colnames(df), sep="\n")
-df <- df[c("id","area","macrozona","ch02","ch03","id02","th","ch00","jh","ch05","ch07","ch09","s","nna","indicador_cuarentena","tramo_pobreza","thogar2","qytot_19","qytot_20","qytot_20_19","j20phq1","j20phq2","j20phq3","j20phq4","n20phq1","n20phq2","n20phq3","n20phq4","j21phq1","j21phq2","j21phq3","j21phq4")]
+df <- df[c("id","area","macrozona","ch02","ch03","ch07","ch09","s","th","ch05","nna","thogar2","indicador_cuarentena","tramo_pobreza","qytot_19","qytot_20","j20phq1","j20phq2","j20phq3","j20phq4","n20phq1","n20phq2","n20phq3","n20phq4","j21phq1","j21phq2","j21phq3","j21phq4")]
 cat(colnames(df), sep="\n")
-
-
 
 #rename vars for simplicity/consistency
 df <- dplyr::rename(df, idno=id)
@@ -250,64 +251,58 @@ df <- dplyr::rename(df, area=area)
 df <- dplyr::rename(df, zone=macrozona)
 df <- dplyr::rename(df, sexr=ch02)
 df <- dplyr::rename(df, ager=ch03)
-df <- dplyr::rename(df, nph1=id02)
-df <- dplyr::rename(df, nph2=th)
-df <- dplyr::rename(df, nbed=ch00)
-df <- dplyr::rename(df, hhou=jh)
-df <- dplyr::rename(df, part=ch05)
 df <- dplyr::rename(df, edlv=ch07)
 df <- dplyr::rename(df, inta=ch09)
 df <- dplyr::rename(df, gmix=s)
+df <- dplyr::rename(df, npho=th)
+df <- dplyr::rename(df, part=ch05)
 df <- dplyr::rename(df, kids=nna)
+df <- dplyr::rename(df, elde=thogar2)
 df <- dplyr::rename(df, quar=indicador_cuarentena)
 df <- dplyr::rename(df, cpov=tramo_pobreza)
-df <- dplyr::rename(df, elde=thogar2)
 df <- dplyr::rename(df, qu19=qytot_19)
 df <- dplyr::rename(df, qu20=qytot_20)
-df <- dplyr::rename(df, oq20=qytot_20_19)
 cat(colnames(df), sep="\n")
 
+df <- na.omit(df)
 
 #define var types
 df$idno <- as.numeric(df$idno)
-df$area <- as.numeric(df$area)
-df$zone <- as.numeric(df$zone)
-df$sexr <- as.numeric(df$sexr)
+df$area <- as.factor(df$area)
+df$zone <- as.factor(df$zone)
+df$sexr <- as.factor(df$sexr)
 df$ager <- as.numeric(df$ager)
-df$nph1 <- as.numeric(df$nph1)
-df$nph2 <- as.numeric(df$nph2)
-df$nbed <- as.numeric(df$nbed)
-df$hhou <- as.numeric(df$hhou)
-df$part <- as.numeric(df$part)
-df$edlv <- as.numeric(df$edlv)
-df$inta <- as.numeric(df$inta)
-df$gmix <- as.numeric(df$gmix)
-df$kids <- as.numeric(df$kids)
-df$quar <- as.numeric(df$quar)
-df$cpov <- as.numeric(df$cpov)
-df$elde <- as.numeric(df$elde)
-df$qu19 <- as.numeric(df$qu19)
-df$qu20 <- as.numeric(df$qu20)
-df$oq20 <- as.numeric(df$oq20)
-df$j20phq1 <- as.numeric(df$j20phq1)
-df$j20phq2 <- as.numeric(df$j20phq2)
-df$j20phq3 <- as.numeric(df$j20phq3)
-df$j20phq4 <- as.numeric(df$j20phq4)
-df$n20phq1 <- as.numeric(df$n20phq1)
-df$n20phq2 <- as.numeric(df$n20phq2)
-df$n20phq3 <- as.numeric(df$n20phq3)
-df$n20phq4 <- as.numeric(df$n20phq4)
-df$j21phq1 <- as.numeric(df$j21phq1)
-df$j21phq2 <- as.numeric(df$j21phq2)
-df$j21phq3 <- as.numeric(df$j21phq3)
-df$j21phq4 <- as.numeric(df$j21phq4)
+df$edlv <- as.ordered(df$edlv)
+df$inta <- as.factor(df$inta)
+df$gmix <- as.factor(df$gmix)
+df$npho <- as.numeric(df$npho)
+df$part <- as.factor(df$part)
+df$kids <- as.factor(df$kids)
+df$elde <- as.factor(df$elde)
+df$quar <- as.factor(df$quar)
+df$cpov <- as.factor(df$cpov)
+df$qu19 <- as.ordered(df$qu19)
+df$qu20 <- as.ordered(df$qu20)
 
-#remove subset dfs to cleanup
-rm(ss_jul20,ss_nov20,ss_jul21)
+df$j20phq1 <- as.ordered(df$j20phq1)
+df$j20phq2 <- as.ordered(df$j20phq2)
+df$j20phq3 <- as.ordered(df$j20phq3)
+df$j20phq4 <- as.ordered(df$j20phq4)
+df$n20phq1 <- as.ordered(df$n20phq1)
+df$n20phq2 <- as.ordered(df$n20phq2)
+df$n20phq3 <- as.ordered(df$n20phq3)
+df$n20phq4 <- as.ordered(df$n20phq4)
+df$j21phq1 <- as.ordered(df$j21phq1)
+df$j21phq2 <- as.ordered(df$j21phq2)
+df$j21phq3 <- as.ordered(df$j21phq3)
+df$j21phq4 <- as.ordered(df$j21phq4)
 
+
+
+cat(colnames(df), sep="\n")
 
 # 4. CFAs -----------------------------------------------------------------
-cat(colnames(df), sep="\n")
+
 
 mod <- 'j20phq =~ j20phq1 + j20phq2 + j20phq3 + j20phq4
         n20phq =~ n20phq1 + n20phq2 + n20phq3 + n20phq4
@@ -405,15 +400,14 @@ ggplot(mtcars, aes(x=wt, y=mpg)) +
 
 # 5 Multigroup CFAs -------------------------------------------------------
 
-df$sexr <- as.factor(df$sexr)
-fitconfig <- lavaan::cfa(mod, data=df, estimator="ML", group="sexr")
-fitmetric <- lavaan::cfa(mod, data=df, estimator="ML", group="sexr", group.equal = c("loadings"))
-fitscalar <- lavaan::cfa(mod, data=df, estimator="ML", group="sexr", group.equal = c("loadings","intercepts"))
-fitresidu <- lavaan::cfa(mod, data=df, estimator="ML", group="sexr", group.equal = c("loadings","intercepts","residuals"))
-paste(round(lavaan::fitMeasures(fitconfig, c("chisq","df","cfi","tli","rmsea","rmsea.ci.lower","rmsea.ci.upper","srmr")),3))
-paste(round(lavaan::fitMeasures(fitmetric, c("chisq","df","cfi","tli","rmsea","rmsea.ci.lower","rmsea.ci.upper","srmr")),3))
-paste(round(lavaan::fitMeasures(fitscalar, c("chisq","df","cfi","tli","rmsea","rmsea.ci.lower","rmsea.ci.upper","srmr")),3))
-paste(round(lavaan::fitMeasures(fitresidu, c("chisq","df","cfi","tli","rmsea","rmsea.ci.lower","rmsea.ci.upper","srmr")),3))
+fitconfig <- lavaan::cfa(mod, data=df, estimator="ULSMV", group="sexr")
+fitmetric <- lavaan::cfa(mod, data=df, estimator="ULSMV", group="sexr", group.equal = c("loadings"))
+fitscalar <- lavaan::cfa(mod, data=df, estimator="ULSMV", group="sexr", group.equal = c("loadings","intercepts"))
+fitresidu <- lavaan::cfa(mod, data=df, estimator="ULSMV", group="sexr", group.equal = c("loadings","intercepts","residuals"))
+paste(round(lavaan::fitMeasures(fitconfig, c("chisq","df","cfi.scaled","tli","rmsea","rmsea.ci.lower","rmsea.ci.upper","srmr")),3))
+paste(round(lavaan::fitMeasures(fitmetric, c("chisq","df","cfi.scaled","tli","rmsea","rmsea.ci.lower","rmsea.ci.upper","srmr")),3))
+paste(round(lavaan::fitMeasures(fitscalar, c("chisq","df","cfi.scaled","tli","rmsea","rmsea.ci.lower","rmsea.ci.upper","srmr")),3))
+paste(round(lavaan::fitMeasures(fitresidu, c("chisq","df","cfi.scaled","tli","rmsea","rmsea.ci.lower","rmsea.ci.upper","srmr")),3))
 lavaan::anova(fitconfig,fitmetric,fitscalar,fitresidu)
 
 
@@ -422,3 +416,13 @@ lavaan::anova(fitconfig,fitmetric,fitscalar,fitresidu)
 
 # 6 SEMs ------------------------------------------------------------------
 
+mod <- 'j20phq =~ j20phq1 + j20phq2 + j20phq3 + j20phq4
+        n20phq =~ n20phq1 + n20phq2 + n20phq3 + n20phq4
+        j21phq =~ j21phq1 + j21phq2 + j21phq3 + j21phq4
+j21phq ~ n20phq
+j21phq ~ j20phq
+n20phq ~ j20phq'
+
+fit <- lavaan::sem(mod,df,estimator="ULSMV")
+lavaan::fitMeasures(fit, c("chisq.scaled","df.scaled","pvalue.scaled","cfi.scaled","tli.scaled","rmsea.scaled","rmsea.ci.lower.scaled","rmsea.ci.upper.scaled","srmr"))
+lavaan::standardizedSolution(fit)
